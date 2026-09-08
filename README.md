@@ -74,15 +74,23 @@ reaching for the button. Clear the box and the selection you had before the sear
 back, so a mistyped search costs nothing.
 
 That last rule means a second search replaces the first. To build a selection out of two
-terms, tick **Add current selection to filter**, which appears while you are searching:
+terms, tick **Add current selection to filter**, which appears while you are searching. It
+hands the selection back to you: the search then only narrows what is on screen, and nothing
+you have ticked disappears because you typed.
 
-1. Type `pum`. The matches are ticked.
-2. Tick *Add current selection to filter*. What is on screen becomes the base.
-3. Clear the search box. That banks the base.
-4. Type `mot`. Those matches are added to the pumps rather than replacing them.
+1. Type `pum`, and untick any match you did not want.
+2. Tick *Add current selection to filter*.
+3. Type `mot`. The list narrows, and your pumps stay ticked while they are off screen.
+4. Tick the motors you want. OK applies both sets.
 
-Clearing the box between terms is what banks each one. A checkbox you tick or untick by hand
-banks immediately, with or without that option.
+Ticking it also puts back the selection the search had just replaced, since by the time you
+can reach the option the search has already been and gone. The exception is a field where
+everything was ticked, which says "no filter" rather than a selection worth restoring, so
+the term you typed survives.
+
+The option stays on until you turn it off, across openings of the same field, and it stays
+visible while it is on so you can see that searching will not pick for you. Turning it off
+puts the search back in charge, and the term on screen becomes the whole selection again.
 
 ## Props
 
@@ -96,7 +104,7 @@ banks immediately, with or without that option.
 | `labels` | `Partial<ExcelFilterLabels>` | `enUS` | Merged over the English defaults |
 | `locale` | `string` | runtime locale | BCP 47 tag used for case folding while searching |
 | `disabled` | `boolean` | `false` | |
-| `allowAddToSelection` | `boolean` | `true` | Offer the accumulate checkbox while searching |
+| `allowAddToSelection` | `boolean` | `true` | Offer the "add current selection" option at all |
 | `pinSelectedToTop` | `boolean` | `true` | Float the selected options to the top on open |
 | `maxListHeight` | `number` | `280` | Height of the scrolling list, in px |
 | `width` | `number \| string` | `300` | Width of the closed field |
@@ -144,7 +152,7 @@ Built and maintained by [APSW](https://apsw.pl).
 
 ```bash
 npm install
-npm test          # 44 tests, 100% coverage of src
+npm test          # 47 tests, 100% coverage of src
 npm run coverage
 npm run typecheck
 npm run build

@@ -75,8 +75,9 @@ const summarize = (selected: FilterOption[], labels: ExcelFilterLabels): string 
  * never triggers a request, and Cancel or Escape discards it.
  *
  * Typing does not merely hide rows: the matches become the selection. That is Excel's
- * search box, and "add current selection to filter" is how Excel lets you build a
- * selection out of more than one search term.
+ * search box. "Add current selection to filter" hands the selection back to the user - the
+ * search then only narrows what is on screen - which is what makes a selection out of two
+ * terms possible: tick what you want under the first term, type the second, tick again.
  */
 export const ExcelFilterSelect: React.FC<ExcelFilterSelectProps> = ({
     options,
@@ -142,7 +143,6 @@ export const ExcelFilterSelect: React.FC<ExcelFilterSelectProps> = ({
         setDraftKeys(initialKeys);
         setPinnedKeys(selectedKeys);
         setSearch('');
-        setAddToSelection(false);
         setOpen(true);
     };
 
@@ -155,45 +155,39 @@ export const ExcelFilterSelect: React.FC<ExcelFilterSelectProps> = ({
         onChange(optionKeys.every((key) => draftSet.has(key)) ? [] : draftKeys);
     };
 
-    /** What a term selects: its matches, or the base grown by them while accumulating. */
-    const selectionForSearch = (needle: string, accumulate: boolean, base: string[]): string[] => {
-        const found = options
-            .filter((option) => matches(option, needle))
-            .map((option) => toKey(option.value));
-
-        if (!accumulate) return found;
-
-        const next = new Set(base);
-        found.forEach((key) => next.add(key));
-        return Array.from(next);
-    };
+    /** The keys a term matches. */
+    const matchingKeys = (needle: string): string[] =>
+        options.filter((option) => matches(option, needle)).map((option) => toKey(option.value));
 
     const handleSearchChange = (nextSearch: string) => {
         setSearch(nextSearch);
+        // While accumulating, the search only narrows what is on screen: the selection is
+        // the user's to build, and nothing they ticked disappears because they typed.
+        if (addToSelection) return;
 
         const needle = normalize(nextSearch);
-        if (!needle) {
-            // With accumulation on, what the search built stays: the base grows to include it.
-            if (addToSelection) preSearchKeys.current = draftKeys;
-            setDraftKeys(preSearchKeys.current);
-            return;
-        }
-        setDraftKeys(selectionForSearch(needle, addToSelection, preSearchKeys.current));
+        setDraftKeys(needle ? matchingKeys(needle) : preSearchKeys.current);
     };
 
     const handleAddToSelectionChange = (accumulate: boolean) => {
         setAddToSelection(accumulate);
 
         if (accumulate) {
-            // "Keep what I am looking at and add to it", so the result on screen becomes the
-            // base rather than the all-ticked state the popup happened to open in. The
-            // visible ticks do not move, because the base already holds this term's matches.
-            preSearchKeys.current = draftKeys;
+            // The search has already replaced the selection by the time this checkbox can be
+            // reached, so ticking it puts back what was ticked before the term was typed, and
+            // from here the search only narrows the list.
+            //
+            // Unless everything was ticked, which says "no filter" rather than a selection
+            // worth keeping - restoring it would undo the term the user is in the middle of.
+            const before = new Set(preSearchKeys.current);
+            if (!optionKeys.every((key) => before.has(key))) {
+                setDraftKeys(preSearchKeys.current);
+            }
             return;
         }
-        // Back to a plain replace: the term on screen is the whole selection again. The
-        // checkbox only exists while a search is running, so there is always a term.
-        setDraftKeys(selectionForSearch(normalize(search), false, []));
+        // Back to a plain replace: the term on screen is the whole selection again.
+        const needle = normalize(search);
+        setDraftKeys(needle ? matchingKeys(needle) : preSearchKeys.current);
     };
 
     const visibleOptions = React.useMemo(() => {
@@ -344,8 +338,10 @@ export const ExcelFilterSelect: React.FC<ExcelFilterSelectProps> = ({
                     }
                     label={searching ? labels.selectAllSearchResults : labels.selectAll}
                 />
-                {/* Only while searching, because with an empty box there is no term to add. */}
-                {allowAddToSelection && searching ? (
+                {/* While searching, because with an empty box there is no term to add - and
+                    whenever it is on, so a setting that outlives the popup stays visible and
+                    can be turned off without typing something first. */}
+                {allowAddToSelection && (searching || addToSelection) ? (
                     <FormControlLabel
                         sx={{ display: 'flex', ml: 0 }}
                         control={

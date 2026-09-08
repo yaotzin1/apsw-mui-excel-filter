@@ -379,7 +379,70 @@ describe('add current selection to filter', () => {
         ).not.toBeInTheDocument();
     });
 
-    it('adds the next term to what is already ticked', async () => {
+    it('combines a selection built out of two terms', async () => {
+        const { user, onChange } = setup();
+        await openPopup(user);
+
+        await user.type(searchBox(), 'pump');
+        await user.click(box('Pump station'));
+        await user.click(box('Add current selection to filter'));
+        await user.clear(searchBox());
+        await user.type(searchBox(), 'motor');
+
+        // The second term ticks nothing on its own: the selection is the user's now.
+        expect(box('Motor')).not.toBeChecked();
+
+        await user.click(box('Motor'));
+        await user.click(okButton());
+
+        expect(onChange).toHaveBeenCalledWith(['1', '3']);
+    });
+
+    it('keeps the ticks that are off screen while a term is showing', async () => {
+        const { user, onChange } = setup();
+        await openPopup(user);
+
+        await user.type(searchBox(), 'pump');
+        await user.click(box('Add current selection to filter'));
+        await user.clear(searchBox());
+        await user.type(searchBox(), 'drill');
+
+        expect(box('Drill')).not.toBeChecked();
+        expect(screen.queryByRole('checkbox', { name: 'Pump' })).not.toBeInTheDocument();
+
+        await user.click(okButton());
+
+        expect(onChange).toHaveBeenCalledWith(['1', '2']);
+    });
+
+    it('does not drag a half-typed term into the selection', async () => {
+        const onChange = vi.fn();
+        const user = userEvent.setup();
+        render(
+            <ExcelFilterSelect
+                label="Kind"
+                options={[
+                    { value: '1', label: 'NDT' },
+                    { value: '2', label: 'Nut' },
+                    { value: '3', label: 'Bolt' },
+                ]}
+                value={[]}
+                onChange={onChange}
+            />,
+        );
+
+        await openPopup(user);
+        await user.type(searchBox(), 'ndt');
+        await user.click(box('Add current selection to filter'));
+        // Backspacing walks back through "nd" and "n", and "n" matches Nut as well.
+        await user.type(searchBox(), '{Backspace>3/}');
+
+        expect(box('NDT')).toBeChecked();
+        expect(box('Nut')).not.toBeChecked();
+        expect(box('Bolt')).not.toBeChecked();
+    });
+
+    it('goes back to replacing when unticked', async () => {
         const { user, onChange } = setup();
         await openPopup(user);
 
@@ -387,82 +450,80 @@ describe('add current selection to filter', () => {
         await user.click(box('Add current selection to filter'));
         await user.clear(searchBox());
         await user.type(searchBox(), 'motor');
-
-        // The list still shows only the current term - accumulation is about the selection,
-        // not about what is on screen.
-        expect(box('Motor')).toBeChecked();
-        expect(screen.queryByRole('checkbox', { name: 'Pump' })).not.toBeInTheDocument();
-
-        await user.click(okButton());
-
-        expect(onChange).toHaveBeenCalledWith(['1', '2', '3']);
-    });
-
-    it('banks what was built when the search box is emptied', async () => {
-        const { user } = setup();
-        await openPopup(user);
-
-        await user.type(searchBox(), 'pump');
-        await user.click(box('Add current selection to filter'));
-        await user.clear(searchBox());
-
-        expect(box('Pump')).toBeChecked();
-        expect(box('Pump station')).toBeChecked();
-        expect(box('Motor')).not.toBeChecked();
-        expect(box('Drill')).not.toBeChecked();
-    });
-
-    it('goes back to replacing when unticked', async () => {
-        const { user } = setup();
-        await openPopup(user);
-
-        await user.type(searchBox(), 'pump');
-        await user.click(box('Add current selection to filter'));
-        await user.clear(searchBox());
-        await user.type(searchBox(), 'motor');
         await user.click(box('Add current selection to filter'));
 
-        // Unticking drops the pumps the term had been added to: this term is the selection.
+        // Unticking drops the pumps it was being added to: this term is the selection again.
         expect(box('Motor')).toBeChecked();
 
         await user.click(okButton());
 
-        expect(trigger()).toHaveValue('Motor');
+        expect(onChange).toHaveBeenCalledWith(['3']);
     });
 
-    it('leaves the banked selection behind when a dropped term is cleared', async () => {
+    it('puts back the selection the search had replaced', async () => {
+        const { user, onChange } = setup({ initial: ['4'] });
+        await openPopup(user);
+
+        await user.type(searchBox(), 'pump');
+
+        // The search got there first, which is the whole reason the option has to undo it.
+        expect(box('Pump')).toBeChecked();
+
+        await user.click(box('Add current selection to filter'));
+
+        expect(box('Pump')).not.toBeChecked();
+
+        await user.click(box('Pump station'));
+        await user.click(okButton());
+
+        expect(onChange).toHaveBeenCalledWith(['4', '2']);
+    });
+
+    it('leaves an all-ticked field alone, having nothing to put back', async () => {
         const { user } = setup();
         await openPopup(user);
 
         await user.type(searchBox(), 'pump');
         await user.click(box('Add current selection to filter'));
-        await user.clear(searchBox());
-        await user.type(searchBox(), 'motor');
-        await user.click(box('Add current selection to filter'));
-        await user.clear(searchBox());
 
-        // Clearing always restores the banked selection, and the unticked term never made
-        // it into the bank - so the pumps come back and the motor does not stay.
+        // "Everything" is not a selection worth restoring, so the term survives.
         expect(box('Pump')).toBeChecked();
         expect(box('Pump station')).toBeChecked();
-        expect(box('Motor')).not.toBeChecked();
     });
 
-    it('starts unticked again the next time the popup opens', async () => {
+    it('stays ticked the next time the popup opens', async () => {
         const { user } = setup();
         await openPopup(user);
 
         await user.type(searchBox(), 'pump');
         await user.click(box('Add current selection to filter'));
-        await user.click(cancelButton());
+        await user.click(okButton());
         await waitFor(() => expect(screen.queryByRole('button', { name: 'OK' })).toBeNull());
 
         await openPopup(user);
+
+        // Visible without typing, because it is on and the user has to be able to see that.
+        expect(box('Add current selection to filter')).toBeChecked();
+
         await user.type(searchBox(), 'motor');
 
-        expect(box('Add current selection to filter')).not.toBeChecked();
-        expect(box('Motor')).toBeChecked();
-        expect(screen.queryByRole('checkbox', { name: 'Pump' })).not.toBeInTheDocument();
+        expect(box('Motor')).not.toBeChecked();
+    });
+
+    it('can be turned off without a term on screen', async () => {
+        const { user } = setup({ initial: ['4'] });
+        await openPopup(user);
+
+        await user.type(searchBox(), 'pump');
+        await user.click(box('Add current selection to filter'));
+        await user.clear(searchBox());
+        await user.click(box('Add current selection to filter'));
+
+        // With no term and the option off, there is nothing left for it to say.
+        expect(
+            screen.queryByRole('checkbox', { name: 'Add current selection to filter' }),
+        ).not.toBeInTheDocument();
+        expect(box('Drill')).toBeChecked();
     });
 });
 
