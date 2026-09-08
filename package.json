@@ -1,0 +1,84 @@
+{
+  "name": "apsw-mui-excel-filter",
+  "version": "0.1.0",
+  "description": "Excel-style filter dropdown for Material UI: search that drives the selection, select-all, and a staged selection applied on OK.",
+  "keywords": [
+    "react",
+    "mui",
+    "material-ui",
+    "filter",
+    "multiselect",
+    "excel",
+    "autofilter",
+    "dropdown",
+    "checkbox",
+    "select"
+  ],
+  "license": "MIT",
+  "author": "yaotzin1 <yaotzin1@o2.pl>",
+  "homepage": "https://github.com/yaotzin1/apsw-mui-excel-filter#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaotzin1/apsw-mui-excel-filter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yaotzin1/apsw-mui-excel-filter/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "peerDependencies": {
+    "@mui/icons-material": "^5.0.0 || ^6.0.0 || ^7.0.0",
+    "@mui/material": "^5.0.0 || ^6.0.0 || ^7.0.0",
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@mui/icons-material": "^5.15.0",
+    "@mui/material": "^5.15.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "jsdom": "^25.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
