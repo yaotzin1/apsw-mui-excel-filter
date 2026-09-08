@@ -7,7 +7,9 @@ Most React multiselects are a checkbox list with a search box bolted on. This on
 behaviour of Excel's AutoFilter dropdown, which behaves differently in three ways that people
 who live in spreadsheets already expect.
 
-![npm](https://img.shields.io/npm/v/apsw-mui-excel-filter) ![license](https://img.shields.io/npm/l/apsw-mui-excel-filter)
+[![npm](https://img.shields.io/npm/v/apsw-mui-excel-filter)](https://www.npmjs.com/package/apsw-mui-excel-filter)
+[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![CI](https://github.com/yaotzin1/apsw-mui-excel-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/yaotzin1/apsw-mui-excel-filter/actions/workflows/ci.yml)
 
 ## Install
 
