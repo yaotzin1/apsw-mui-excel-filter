@@ -124,6 +124,18 @@ Override one string and the rest stay English:
 <ExcelFilterSelect labels={{ selectedCount: (n) => `${n} ausgewählt` }} {...props} />
 ```
 
+## Where it comes from
+
+This is not a component written to be a package. It was built for a production
+line-of-business app, where people filter long equipment lists all day and had been asking
+for the dropdown to behave the way the spreadsheets on the next monitor do. The rules here
+are what those users asked for, argued about, and settled on in use.
+
+[Claude Code](https://claude.com/claude-code) extracted it from that codebase: lifting the
+component out, replacing the hardcoded Polish strings and app-specific wiring with props,
+dropping the branches the surrounding screen made unreachable, and covering the behaviour
+with the test suite below before any of it was published.
+
 ## Development
 
 ```bash
