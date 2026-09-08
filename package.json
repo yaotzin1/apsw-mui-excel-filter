@@ -15,7 +15,11 @@
     "select"
   ],
   "license": "MIT",
-  "author": "yaotzin1 <yaotzin1@o2.pl>",
+  "author": {
+    "name": "yaotzin1",
+    "email": "yaotzin1@o2.pl",
+    "url": "https://apsw.pl"
+  },
   "homepage": "https://github.com/yaotzin1/apsw-mui-excel-filter#readme",
   "repository": {
     "type": "git",

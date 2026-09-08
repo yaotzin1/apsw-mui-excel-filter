@@ -136,6 +136,8 @@ component out, replacing the hardcoded Polish strings and app-specific wiring wi
 dropping the branches the surrounding screen made unreachable, and covering the behaviour
 with the test suite below before any of it was published.
 
+Built and maintained by [APSW](https://apsw.pl).
+
 ## Development
 
 ```bash
@@ -148,4 +150,4 @@ npm run build
 
 ## License
 
-MIT, © APSW.
+MIT, © [APSW](https://apsw.pl).
