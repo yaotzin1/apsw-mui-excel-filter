@@ -1,6 +1,6 @@
 {
   "name": "apsw-mui-excel-filter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Excel-style filter dropdown for Material UI: search that drives the selection, select-all, and a staged selection applied on OK.",
   "keywords": [
     "react",
