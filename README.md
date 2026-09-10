@@ -11,6 +11,12 @@ who live in spreadsheets already expect.
 [![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![CI](https://github.com/yaotzin1/apsw-mui-excel-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/yaotzin1/apsw-mui-excel-filter/actions/workflows/ci.yml)
 
+![Building a filter out of two search terms](https://raw.githubusercontent.com/yaotzin1/apsw-mui-excel-filter/main/docs/usage.gif)
+
+Typing `syd` selects Sydney and drops every other city. Ticking *Add current selection to
+filter* hands the selection back, so typing `tok` narrows the list without losing Sydney,
+and OK applies both. Recorded from [`example/`](./example).
+
 ## Install
 
 ```bash
@@ -54,6 +60,18 @@ export function Filters() {
 
 `onChange` fires on OK only, never while the popup is being edited, so a half-built
 selection never triggers a request.
+
+## Try it
+
+[`example/`](./example) is a Vite app that filters a day of meal orders by cuisine, city and
+status with three of these fields, and shows the request the three values would make so you
+can watch a parameter leave the query string as a field goes back to unfiltered.
+
+```bash
+cd example
+npm install
+npm run dev
+```
 
 ## What makes it Excel
 
